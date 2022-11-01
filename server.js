@@ -4,6 +4,10 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const router = require('./src/routes')
+const { createDBConn } = require('./src/database/db')
+
+
+createDBConn();
 
 process
   .on('unhandledRejection', (reason, p) => {
@@ -14,17 +18,15 @@ process
     process.exit(1);
   });
 
-const { server } = require('./config')
-console.log(server)
-
+const {server} = require('./src/config')
 app.use(cors())
 app.use('/',router)
 
-const { PORT } = server
 
-app.listen(3000, ()=>{
-    console.log(`connection open on ${PORT}`)
+app.listen(server.port, ()=>{
+    console.log(`connection open on ${server.port}`)
 })
+
 
 
 module.exports = app

@@ -2,10 +2,11 @@
 
 require(`dotenv`).config()
 
-console.log(process.env.PORT)
-
 module.exports = {
     server : {
         port: process.env.PORT
+    },
+    database:{
+        dbUrl:process.env.URL
     }
 }
