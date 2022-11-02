@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const router = require('./src/routes')
-const { createDBConn } = require('./src/database/db')
+const { createDBConn } = require('./src/connection/db')
 
 
 createDBConn();

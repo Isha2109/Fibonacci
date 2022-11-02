@@ -1,6 +1,7 @@
-var mongoose = require('mongoose')
+const mongoose = require('mongoose')
+const { mongodb } = require('../config')
 
-const dbUrl = "mongodb+srv://user001:user001@clusterpassport.gquk8.mongodb.net/?retryWrites=true&w=majority"
+const dbUrl = `mongodb+srv://${mongodb.user}:${mongodb.pass}@${mongodb.url}/?retryWrites=true&w=majority`
 
 function createDBConn(){
     mongoose.connect(dbUrl,{useNewUrlParser: true});

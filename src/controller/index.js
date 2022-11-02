@@ -1,15 +1,9 @@
 'use strict'
 const { FibSchema } = require('../schema/schema');
-const {getReqId}= require('../general/general');
-const redis = require('redis');
-const client = redis.createClient({legacyMode: true});
-
-client.on('connect', function() {
-    console.log('Connected!'); // Connected!
-  });
+const { getReqId }= require('../utils/utils');
+const { getRedisConnection } = require('../connection/redis')
 
 const DEFAULT_EXPIRATION = 3600
-
 
 function fib(index) {
     let data
@@ -39,33 +33,35 @@ function fib(index) {
     return data;
 }
 
-async function getFibNum (req,res) {
+async function getFibNum (req, res) {
     try{
-        const data = fib(req.params.index).toString()
-        if(data){
-            client.SETEX('index', req.params.index, DEFAULT_EXPIRATION, function(err, reply){
-        //client.set('index', req.params.index, 'number', data , function(err, reply) {
-                console.log(reply); 
-        });
-        res.status(200).send({ number: data})}
-        await getReqDetails(req)
+        const num = req.params.index
+        const redisConn = await getRedisConnection()
+        let fibNo = await redisConn.get(num)
+        if (!fibNo) {
+            fibNo = fib(Number(num)).toString()     
+            await redisConn.set(num, fibNo, DEFAULT_EXPIRATION)
+            await setReqDetails(num, req.socket.localAddress)
+        }
+        fibNo = Number(num)<0 ? `-${fibNo}` : fibNo
+        res.status(200).send({ fibNo })
     }
     catch(e){
-        console.log(e)
+        console.log({ e })
         res.status(404).send({ message: "Failed to generate fibonacci number"})
     }
 }
 
-async function getReqDetails(req){
+async function setReqDetails(fibNo, ip){
     try{
         let userInfoObj = new FibSchema({
-            indexNum: req.params.index,
+            indexNum: fibNo,
             createdAt: new Date(),
-            IPAddress: req.socket.localAddress,
+            IPAddress: ip,
             reqId: getReqId()
         })
         await userInfoObj.save()
-        return { message:"db stored" }
+        return { message: "db stored" }
     }
     catch(e){
         console.log(e)
