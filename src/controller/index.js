@@ -5,32 +5,15 @@ const { getRedisConnection } = require('../connection/redis')
 
 const DEFAULT_EXPIRATION = 3600
 
-function fib(index) {
-    let data
-    let num1 = BigInt(0)
-    let num2 = BigInt(1)
-    let currentNumber;
-    let countMax=Math.abs(index)+1;
-    let counter=2;
-    if(index==0){
-      data = num1;
-    } 
-    else if (index==1||index==-1){
-      data = num2;
+function fib (index) {
+    if(index == Math.abs(0) || index == Math.abs(1)) return index
+    let n1 = BigInt(0), n2 = BigInt(1), nextTerm = BigInt(0);
+    for (let i = 1; i <= Math.abs(index); i++) {
+        nextTerm = n1 + n2;
+        n1 = n2;
+        n2 = nextTerm;
     }
-    while(counter<countMax)
-    {
-          currentNumber=num1+num2;
-          num1=num2;
-          num2=currentNumber;
-          counter++;
-    }
-    if((index<0) && (index % 2 ==0))
-    {
-      data = currentNumber;
-    }
-    data = currentNumber;
-    return data;
+    return nextTerm;
 }
 
 async function getFibNum (req, res) {
